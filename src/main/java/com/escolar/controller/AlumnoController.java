@@ -1,9 +1,8 @@
 package com.escolar.controller;
 
-import com.escolar.dto.AlumnoRequest;
-import com.escolar.dto.ApiResponse;
 import com.escolar.model.Alumno;
 import com.escolar.service.AlumnoService;
+import com.escolar.dto.AlumnoRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,16 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * Controlador REST para el recurso Alumno.
- *
- * Endpoints disponibles:
- *   GET    /alumnos          → lista todos los alumnos          (200)
- *   GET    /alumnos/{id}     → obtiene un alumno por ID         (200 | 404)
- *   POST   /alumnos          → crea un nuevo alumno             (201 | 400)
- *   PUT    /alumnos/{id}     → actualiza un alumno existente    (200 | 400 | 404)
- *   DELETE /alumnos/{id}     → elimina un alumno                (200 | 404)
- */
 @RestController
 @RequestMapping("/alumnos")
 public class AlumnoController {
@@ -31,51 +20,31 @@ public class AlumnoController {
         this.service = service;
     }
 
-    // ─── GET /alumnos ──────────────────────────────────────────────────────────
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Alumno>>> listar() {
-        List<Alumno> alumnos = service.obtenerTodos();
-        return ResponseEntity.ok(
-                ApiResponse.ok("Alumnos obtenidos correctamente", alumnos)
-        );
+    public ResponseEntity<List<Alumno>> listar() {
+        return ResponseEntity.ok(service.obtenerTodos());
     }
 
-    // ─── GET /alumnos/{id} ─────────────────────────────────────────────────────
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Alumno>> obtener(@PathVariable Long id) {
-        Alumno alumno = service.obtenerPorId(id); // lanza 404 si no existe
-        return ResponseEntity.ok(
-                ApiResponse.ok("Alumno encontrado", alumno)
-        );
+    public ResponseEntity<Alumno> obtener(@PathVariable Long id) {
+        return ResponseEntity.ok(service.obtenerPorId(id));
     }
 
-    // ─── POST /alumnos ─────────────────────────────────────────────────────────
     @PostMapping
-    public ResponseEntity<ApiResponse<Alumno>> crear(@Valid @RequestBody AlumnoRequest request) {
-        Alumno nuevo = service.crear(request);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(ApiResponse.ok("Alumno creado correctamente", nuevo));
+    public ResponseEntity<Alumno> crear(@Valid @RequestBody AlumnoRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(request));
     }
 
-    // ─── PUT /alumnos/{id} ─────────────────────────────────────────────────────
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Alumno>> actualizar(
+    public ResponseEntity<Alumno> actualizar(
             @PathVariable Long id,
             @Valid @RequestBody AlumnoRequest request) {
-
-        Alumno actualizado = service.actualizar(id, request); // lanza 404 si no existe
-        return ResponseEntity.ok(
-                ApiResponse.ok("Alumno actualizado correctamente", actualizado)
-        );
+        return ResponseEntity.ok(service.actualizar(id, request));
     }
 
-    // ─── DELETE /alumnos/{id} ──────────────────────────────────────────────────
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> eliminar(@PathVariable Long id) {
-        service.eliminar(id); // lanza 404 si no existe
-        return ResponseEntity.ok(
-                ApiResponse.ok("Alumno eliminado correctamente")
-        );
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        service.eliminar(id);
+        return ResponseEntity.ok().build();
     }
 }

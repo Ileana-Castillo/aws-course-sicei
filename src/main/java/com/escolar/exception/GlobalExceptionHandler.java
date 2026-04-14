@@ -1,69 +1,80 @@
 package com.escolar.exception;
 
-import com.escolar.dto.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import jakarta.servlet.ServletException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * Manejador global de excepciones.
- * Captura errores de validación, recursos no encontrados y errores inesperados,
- * y devuelve siempre una respuesta JSON con el código HTTP correcto.
- */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    /**
-     * 404 - Recurso no encontrado
-     */
+    /** 404 - Recurso no encontrado en el almacén en memoria */
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handleNotFound(ResourceNotFoundException ex) {
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(ApiResponse.error(ex.getMessage()));
+    public ResponseEntity<Map<String, Object>> handleNotFound(ResourceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(errorBody(ex.getMessage()));
     }
 
-    /**
-     * 400 - Errores de validación Bean Validation (@Valid)
-     * Devuelve un mapa con campo → mensaje de error.
-     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(errorBody("Recurso no encontrado: identificador inválido '" + ex.getValue() + "'"));
+    }
+
+    @ExceptionHandler({NoHandlerFoundException.class, NoResourceFoundException.class})
+    public ResponseEntity<Map<String, Object>> handleNoHandler(Exception ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(errorBody("La ruta solicitada no existe"));
+    }
+
+    @ExceptionHandler(ServletException.class)
+    public ResponseEntity<Map<String, Object>> handleServletException(ServletException ex) {
+        String msg = ex.getMessage() != null ? ex.getMessage() : "";
+        // Method Not Allowed
+        if (msg.contains("Request method") || msg.contains("405") || msg.contains("not supported")) {
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                    .body(errorBody("Método HTTP no permitido en esta ruta"));
+        }
+        // Cualquier otro ServletException → 400
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(errorBody("Petición inválida: " + msg));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Void>> handleValidation(MethodArgumentNotValidException ex) {
-        Map<String, String> errores = new LinkedHashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-                errores.put(error.getField(), error.getDefaultMessage())
-        );
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error("Error de validación en los datos enviados", errores));
+    public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
+        Map<String, Object> errores = new LinkedHashMap<>();
+        ex.getBindingResult().getFieldErrors()
+                .forEach(e -> errores.put(e.getField(), e.getDefaultMessage()));
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("error", "Error de validación");
+        body.put("campos", errores);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
-    /**
-     * 400 - JSON malformado o tipo de dato incorrecto en el cuerpo de la petición
-     */
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ApiResponse<Void>> handleMalformedJson(HttpMessageNotReadableException ex) {
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error(
-                        "El cuerpo de la petición contiene JSON inválido o tipos de dato incorrectos. " +
-                        "Verifique que los números no vengan como texto y que el JSON esté bien formado."
-                ));
+    public ResponseEntity<Map<String, Object>> handleMalformedJson(HttpMessageNotReadableException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(errorBody("JSON inválido o tipos de dato incorrectos: " + ex.getMostSpecificCause().getMessage()));
     }
 
-    /**
-     * 500 - Cualquier otro error inesperado
-     */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>> handleGeneral(Exception ex) {
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("Error interno del servidor: " + ex.getMessage()));
+    public ResponseEntity<Map<String, Object>> handleGeneral(Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(errorBody("Error interno del servidor: " + ex.getMessage()));
+    }
+
+    private Map<String, Object> errorBody(String mensaje) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("error", mensaje);
+        return body;
     }
 }

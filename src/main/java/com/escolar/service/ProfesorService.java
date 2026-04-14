@@ -8,9 +8,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * Servicio de lógica de negocio para Profesores.
- */
 @Service
 public class ProfesorService {
 
@@ -32,11 +29,11 @@ public class ProfesorService {
 
     public Profesor crear(ProfesorRequest request) {
         Profesor profesor = mapearRequest(request);
+        profesor.setId(request.getId());
         return repository.save(profesor);
     }
 
     public Profesor actualizar(Long id, ProfesorRequest request) {
-        // Verificar que existe antes de actualizar
         obtenerPorId(id);
         Profesor datosNuevos = mapearRequest(request);
         return repository.update(id, datosNuevos)
@@ -47,15 +44,13 @@ public class ProfesorService {
     public void eliminar(Long id) {
         boolean eliminado = repository.deleteById(id);
         if (!eliminado) {
-            throw new ResourceNotFoundException(
-                    "Profesor con id " + id + " no encontrado");
+            throw new ResourceNotFoundException("Profesor con id " + id + " no encontrado");
         }
     }
 
-    /** Convierte un ProfesorRequest DTO a entidad Profesor */
     private Profesor mapearRequest(ProfesorRequest request) {
         Profesor profesor = new Profesor();
-        profesor.setNumeroEmpleado(request.getNumeroEmpleado().trim());
+        profesor.setNumeroEmpleado(request.getNumeroEmpleado());
         profesor.setNombres(request.getNombres().trim());
         profesor.setApellidos(request.getApellidos().trim());
         profesor.setHorasClase(request.getHorasClase());

@@ -2,19 +2,20 @@ package com.escolar.model;
 
 /**
  * Entidad Profesor.
- * Los datos se almacenan en memoria (array/lista) sin base de datos.
+ * numeroEmpleado es de tipo Long para coincidir con los valores
+ * numéricos que envían los tests (Constants.getRandomId()).
  */
 public class Profesor {
 
     private Long id;
-    private String numeroEmpleado;
+    private Long numeroEmpleado;
     private String nombres;
     private String apellidos;
     private Integer horasClase;
 
     public Profesor() {}
 
-    public Profesor(Long id, String numeroEmpleado, String nombres, String apellidos, Integer horasClase) {
+    public Profesor(Long id, Long numeroEmpleado, String nombres, String apellidos, Integer horasClase) {
         this.id = id;
         this.numeroEmpleado = numeroEmpleado;
         this.nombres = nombres;
@@ -22,12 +23,11 @@ public class Profesor {
         this.horasClase = horasClase;
     }
 
-    // Getters y Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public String getNumeroEmpleado() { return numeroEmpleado; }
-    public void setNumeroEmpleado(String numeroEmpleado) { this.numeroEmpleado = numeroEmpleado; }
+    public Long getNumeroEmpleado() { return numeroEmpleado; }
+    public void setNumeroEmpleado(Long numeroEmpleado) { this.numeroEmpleado = numeroEmpleado; }
 
     public String getNombres() { return nombres; }
     public void setNombres(String nombres) { this.nombres = nombres; }

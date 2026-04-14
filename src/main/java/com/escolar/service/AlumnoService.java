@@ -8,9 +8,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * Servicio de lógica de negocio para Alumnos.
- */
 @Service
 public class AlumnoService {
 
@@ -32,12 +29,13 @@ public class AlumnoService {
 
     public Alumno crear(AlumnoRequest request) {
         Alumno alumno = mapearRequest(request);
+        // Usar el id provisto por el cliente
+        alumno.setId(request.getId());
         return repository.save(alumno);
     }
 
     public Alumno actualizar(Long id, AlumnoRequest request) {
-        // Verificar que existe antes de actualizar
-        obtenerPorId(id);
+        obtenerPorId(id); // lanza 404 si no existe
         Alumno datosNuevos = mapearRequest(request);
         return repository.update(id, datosNuevos)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -52,7 +50,6 @@ public class AlumnoService {
         }
     }
 
-    /** Convierte un AlumnoRequest DTO a entidad Alumno */
     private Alumno mapearRequest(AlumnoRequest request) {
         Alumno alumno = new Alumno();
         alumno.setNombres(request.getNombres().trim());

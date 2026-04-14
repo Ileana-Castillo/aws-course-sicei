@@ -2,11 +2,9 @@ package com.escolar.dto;
 
 import jakarta.validation.constraints.*;
 
-/**
- * DTO para crear/actualizar un Alumno.
- * Contiene validaciones de campos vacíos y tipos de dato.
- */
 public class AlumnoRequest {
+
+    private Long id;
 
     @NotBlank(message = "El campo 'nombres' no puede estar vacío")
     @Size(min = 2, max = 100, message = "El campo 'nombres' debe tener entre 2 y 100 caracteres")
@@ -21,9 +19,7 @@ public class AlumnoRequest {
     private String apellidos;
 
     @NotBlank(message = "El campo 'matricula' no puede estar vacío")
-    @Size(min = 3, max = 20, message = "El campo 'matricula' debe tener entre 3 y 20 caracteres")
-    @Pattern(regexp = "^[a-zA-Z0-9\\-]+$",
-             message = "El campo 'matricula' solo puede contener letras, números y guiones")
+    @Size(min = 1, max = 50, message = "El campo 'matricula' debe tener entre 1 y 50 caracteres")
     private String matricula;
 
     @NotNull(message = "El campo 'promedio' no puede estar vacío")
@@ -33,7 +29,9 @@ public class AlumnoRequest {
                 message = "El campo 'promedio' debe ser menor o igual a 10.0")
     private Double promedio;
 
-    // Getters y Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
     public String getNombres() { return nombres; }
     public void setNombres(String nombres) { this.nombres = nombres; }
 
