@@ -1,0 +1,14 @@
+com\escolar\ApiEscolarApplication.class
+com\escolar\service\ProfesorService.class
+com\escolar\service\AlumnoService.class
+com\escolar\dto\ProfesorRequest.class
+com\escolar\controller\ProfesorController.class
+com\escolar\repository\ProfesorRepository.class
+com\escolar\model\Profesor.class
+com\escolar\exception\ResourceNotFoundException.class
+com\escolar\model\Alumno.class
+com\escolar\dto\ApiResponse.class
+com\escolar\exception\GlobalExceptionHandler.class
+com\escolar\repository\AlumnoRepository.class
+com\escolar\dto\AlumnoRequest.class
+com\escolar\controller\AlumnoController.class
